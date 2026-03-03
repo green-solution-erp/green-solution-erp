@@ -16,23 +16,60 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-2 d-none d-md-block sidebar">
-                <h4 class="text-center mt-2 mb-1">
-                    <i class="bi bi-recycle"></i> Green Solution<br><small>Print</small>
-                </h4>
-                <div class="text-center text-muted mb-2"><small><i class="bi bi-geo-alt-fill"></i> Paraguay</small>
+            <!-- Mobile Navbar (Visible solo en dispositivos móviles) -->
+            <nav class="navbar navbar-light bg-light d-md-none position-sticky top-0 z-3 border-bottom shadow-sm">
+                <div class="container-fluid">
+                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas"
+                        data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+                        <span class="fs-2 text-success">&#9776;</span>
+                    </button>
+                    <a class="navbar-brand text-success fw-bold d-flex align-items-center"
+                        href="{{ url_for('dashboard') }}">
+                        <i class="bi bi-recycle me-2"></i> Green Print
+                    </a>
                 </div>
-                <div class="slogan">"Soluciones gráficas en armonía con el medio ambiente"</div>
+            </nav>
 
-                <a href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2"></i> Inicio</a>
-                <a href="{{ url_for('inventario') }}"><i class="bi bi-box-seam"></i> Inventario Eco <i
-                        class="bi bi-tree"></i></a>
-                <a href="{{ url_for('clientes') }}"><i class="bi bi-people"></i> Clientes</a>
-                <a href="{{ url_for('ventas') }}"><i class="bi bi-cash-coin"></i> Ventas & Caja</a>
-                <a href="{{ url_for('soporte') }}"><i class="bi bi-wrench-adjustable"></i> Soporte <i
-                        class="bi bi-droplet"></i></a>
-                <a href="{{ url_for('configuracion') }}"><i class="bi bi-gear"></i> Configuración</a>
+            <!-- Sidebar / Offcanvas Menu -->
+            <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar collapse offcanvas-md offcanvas-start">
+                <div class="offcanvas-header d-md-none border-bottom">
+                    <h5 class="offcanvas-title text-success"><i class="bi bi-recycle"></i> Green Solution Print</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                        data-bs-target="#sidebarMenu" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-2 overflow-y-auto">
+                    <h4 class="text-center mt-2 mb-1">
+                        <i class="bi bi-recycle"></i> Green Solution<br><small>Print</small>
+                    </h4>
+                    <div class="text-center text-muted mb-2"><small><i class="bi bi-geo-alt-fill"></i> Paraguay</small>
+                    </div>
+                    <div class="slogan">"Soluciones gráficas en armonía con el medio ambiente"</div>
+
+                    {% if session.get('usuario') %}
+                    <a href="{{ url_for('dashboard') }}"
+                        class="{% if request.endpoint == 'dashboard' %}active{% endif %}"><i
+                            class="bi bi-speedometer2"></i> Inicio</a>
+                    <a href="{{ url_for('inventario') }}"
+                        class="{% if request.endpoint == 'inventario' %}active{% endif %}"><i
+                            class="bi bi-box-seam"></i> Inventario Eco <i class="bi bi-tree"></i></a>
+                    <a href="{{ url_for('clientes') }}"
+                        class="{% if request.endpoint == 'clientes' %}active{% endif %}"><i class="bi bi-people"></i>
+                        Clientes</a>
+                    <a href="{{ url_for('ventas') }}" class="{% if request.endpoint == 'ventas' %}active{% endif %}"><i
+                            class="bi bi-cash-coin"></i> Ventas & Caja</a>
+                    <a href="{{ url_for('soporte') }}"
+                        class="{% if request.endpoint == 'soporte' %}active{% endif %}"><i
+                            class="bi bi-wrench-adjustable"></i> Soporte <i class="bi bi-droplet"></i></a>
+                    <a href="{{ url_for('configuracion') }}"
+                        class="{% if request.endpoint == 'configuracion' %}active{% endif %}"><i class="bi bi-gear"></i>
+                        Configuración</a>
+                    <hr class="my-3">
+                    <a href="{{ url_for('logout') }}" class="text-danger"><i class="bi bi-box-arrow-right"></i> Cerrar
+                        Sesión ({{ session.get('usuario') }})</a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
+                    {% endif %}
+                </div>
             </nav>
 
             <!-- Main Content -->
