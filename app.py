@@ -28,9 +28,8 @@ def load_user(user_id):
         return User(id=user_row['id'], username=user_row['username'])
     return None
 
-if not os.path.exists(DB_FILE):
-    import database
-    database.create_db()
+import database
+database.create_db()
 
 def get_db():
     db = getattr(g, '_database', None)
