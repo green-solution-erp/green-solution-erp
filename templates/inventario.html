@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Inventario</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+            data-bs-target="#nuevoProductoModal">
+            <i class="bi bi-plus-circle"></i> Nuevo Producto
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="insumos-tab" data-bs-toggle="tab" data-bs-target="#insumos-tab-pane"
+                    type="button" role="tab" aria-controls="insumos-tab-pane" aria-selected="true">Insumos
+                    (Productos)</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="maquinas-tab" data-bs-toggle="tab" data-bs-target="#maquinas-tab-pane"
+                    type="button" role="tab" aria-controls="maquinas-tab-pane" aria-selected="false">Maquinaria</button>
+            </li>
+        </ul>
+        <div class="tab-content mt-3" id="myTabContent">
+            <!-- Pestaña Insumos -->
+            <div class="tab-pane fade show active" id="insumos-tab-pane" role="tabpanel" aria-labelledby="insumos-tab"
+                tabindex="0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Marca</th>
+                                <th>Categoría</th>
+                                <th>Costo (USD)</th>
+                                <th>Precio Venta (USD)</th>
+                                <th>Stock</th>
+                                <th>Certificación Eco</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in productos %}
+                            <tr {% if p['stock_actual'] <=p['stock_minimo'] %}class="table-danger" {% endif %}>
+                                <td>{{ p['id'] }}</td>
+                                <td>{{ p['nombre'] }}</td>
+                                <td>{{ p['marca'] }}</td>
+                                <td>{{ p['categoria'] }}</td>
+                                <td>${{ '{:,.2f}'.format(p['precio_costo_usd']) }}</td>
+                                <td>${{ '{:,.2f}'.format(p['precio_venta_usd']) }}</td>
+                                <td>
+                                    {{ p['stock_actual'] }}
+                                    {% if p['stock_actual'] <= p['stock_minimo'] %} <span
+                                        class="badge bg-danger rounded-pill"><i
+                                            class="bi bi-exclamation-triangle"></i></span>
+                                        {% endif %}
+                                </td>
+                                <td>
+                                    {% if p['certificacion_eco'] != 'Ninguna' %}
+                                    <span class="badge bg-success"><i class="bi bi-star"></i> {{ p['certificacion_eco']
+                                        }}</span>
+                                    {% else %}
+                                    <span class="text-muted">{{ p['certificacion_eco'] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                        data-bs-target="#editarProductoModal{{ p['id'] }}" title="Editar Producto">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#eliminarProductoModal{{ p['id'] }}" title="Eliminar Producto">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pestaña Maquinas -->
+            <div class="tab-pane fade" id="maquinas-tab-pane" role="tabpanel" aria-labelledby="maquinas-tab"
+                tabindex="0">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                        data-bs-target="#nuevaMaquinaModal">
+                        <i class="bi bi-plus-circle"></i> Nueva Máquina
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Número de Serie</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Estado</th>
+                                <th>Eficiencia Energética</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in maquinarias %}
+                            <tr>
+                                <td><strong>{{ m['numero_serie'] }}</strong></td>
+                                <td>{{ m['marca'] }}</td>
+                                <td>{{ m['modelo'] }}</td>
+                                <td>
+                                    {% if m['estado'] == 'Disponible' %}
+                                    <span class="badge bg-success">Disponible</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ m['estado'] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if 'Alta' in m['eficiencia_energetica'] %}
+                                    <span class="badge text-bg-success"><i class="bi bi-lightning-charge"></i> {{
+                                        m['eficiencia_energetica'] }}</span>
+                                    {% else %}
+                                    <span class="badge text-bg-light">{{ m['eficiencia_energetica'] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary"><i
+                                            class="bi bi-pencil"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nuevo Producto -->
+<div class="modal fade" id="nuevoProductoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ url_for('inventario') }}" method="POST">
+            <input type="hidden" name="action" value="add_producto">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Insumo/Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Producto</label>
+                        <input type="text" class="form-control" name="nombre" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Marca</label>
+                            <input type="text" class="form-control" name="marca">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Categoría</label>
+                            <select class="form-select" name="categoria" required>
+                                <option value="Equipos">Equipos</option>
+                                <option value="Insumos">Insumos</option>
+                                <option value="Repuestos">Repuestos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Costo (USD)</label>
+                            <input type="number" step="0.01" class="form-control" name="precio_costo_usd" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Precio Venta (USD)</label>
+                            <input type="number" step="0.01" class="form-control" name="precio_venta_usd" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock Actual</label>
+                            <input type="number" class="form-control" name="stock_actual" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock Mínimo</label>
+                            <input type="number" class="form-control" name="stock_minimo" value="10" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Certificación Ecológica</label>
+                        <select class="form-select" name="certificacion_eco">
+                            <option value="Ninguna">Ninguna</option>
+                            <option value="FSC Mix">FSC Mix</option>
+                            <option value="FSC 100%">FSC 100%</option>
+                            <option value="PEFC">PEFC</option>
+                            <option value="Material Reciclado">Material Reciclado</option>
+                            <option value="Tintas Ecológicas (GREENGUARD)">Tintas Ecológicas (GREENGUARD)</option>
+                        </select>
+                        <div class="form-text">Priorizamos productos con impacto ambiental reducido.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Nueva Maquina -->
+<div class="modal fade" id="nuevaMaquinaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ url_for('inventario') }}" method="POST">
+            <input type="hidden" name="action" value="add_maquina">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Nueva Máquina</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Número de Serie (ÚNICO)</label>
+                        <input type="text" class="form-control" name="numero_serie" required
+                            placeholder="Ej: NOC-12345">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Marca</label>
+                        <select class="form-select" name="marca" required>
+                            <option value="Nocai">Nocai</option>
+                            <option value="Vulcan">Vulcan</option>
+                            <option value="Saga">Saga</option>
+                            <option value="Otra">Otra</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Modelo</label>
+                        <input type="text" class="form-control" name="modelo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tecnología / Eficiencia</label>
+                        <select class="form-select" name="eficiencia_energetica">
+                            <option value="Estándar">Estándar</option>
+                            <option value="Alta Eficiencia (Low Impact)">Alta Eficiencia (Low Impact)</option>
+                            <option value="Eficiencia A++">Eficiencia A++</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Máquina</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% for p in productos %}
+<!-- Modal Editar Producto -->
+<div class="modal fade" id="editarProductoModal{{ p['id'] }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ url_for('editar_producto', id=p['id']) }}" method="POST">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Insumo/Producto - #{{ p['id'] }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Producto</label>
+                        <input type="text" class="form-control" name="nombre" value="{{ p['nombre'] }}" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Marca</label>
+                            <input type="text" class="form-control" name="marca" value="{{ p['marca'] }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Categoría</label>
+                            <select class="form-select" name="categoria" required>
+                                <option value="Equipos" {% if p['categoria']=='Equipos' %}selected{% endif %}>Equipos
+                                </option>
+                                <option value="Insumos" {% if p['categoria']=='Insumos' %}selected{% endif %}>Insumos
+                                </option>
+                                <option value="Repuestos" {% if p['categoria']=='Repuestos' %}selected{% endif %}>
+                                    Repuestos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Costo (USD)</label>
+                            <input type="number" step="0.01" class="form-control" name="precio_costo_usd"
+                                value="{{ p['precio_costo_usd'] }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Precio Venta (USD)</label>
+                            <input type="number" step="0.01" class="form-control" name="precio_venta_usd"
+                                value="{{ p['precio_venta_usd'] }}" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock Actual</label>
+                            <input type="number" class="form-control" name="stock_actual"
+                                value="{{ p['stock_actual'] }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock Mínimo</label>
+                            <input type="number" class="form-control" name="stock_minimo"
+                                value="{{ p['stock_minimo'] }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Certificación Ecológica</label>
+                        <select class="form-select" name="certificacion_eco">
+                            <option value="Ninguna" {% if p['certificacion_eco']=='Ninguna' %}selected{% endif %}>
+                                Ninguna</option>
+                            <option value="FSC Mix" {% if p['certificacion_eco']=='FSC Mix' %}selected{% endif %}>FSC
+                                Mix</option>
+                            <option value="FSC 100%" {% if p['certificacion_eco']=='FSC 100%' %}selected{% endif %}>FSC
+                                100%</option>
+                            <option value="PEFC" {% if p['certificacion_eco']=='PEFC' %}selected{% endif %}>PEFC
+                            </option>
+                            <option value="Material Reciclado" {% if p['certificacion_eco']=='Material Reciclado'
+                                %}selected{% endif %}>Material Reciclado</option>
+                            <option value="Tintas Ecológicas (GREENGUARD)" {% if
+                                p['certificacion_eco']=='Tintas Ecológicas (GREENGUARD)' %}selected{% endif %}>Tintas
+                                Ecológicas (GREENGUARD)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Eliminar Producto -->
+<div class="modal fade" id="eliminarProductoModal{{ p['id'] }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ url_for('eliminar_producto', id=p['id']) }}" method="POST"
+            onsubmit="return confirm('ATENCIÓN: ¿Está absolutamente seguro de que desea eliminar este producto? Esta acción es irreversible.');">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Eliminar Producto - #{{ p['id'] }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Desea eliminar el producto <strong>{{ p['nombre'] }}</strong>?</p>
+                    <p class="text-danger"><small><i class="bi bi-exclamation-triangle"></i> Se le pedirá una segunda
+                            confirmación al presionar "Eliminar Definitivamente".</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar Definitivamente</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

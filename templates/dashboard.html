@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard Principal</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Tipo de Cambio: {{
+                '{:,.0f}'.format(config['tipo_cambio']).replace(',', '.') }} PYG</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Ventas del Mes -->
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Ventas del Mes (USD)</h5>
+                <h2 class="card-text">${{ '{:,.2f}'.format(ventas_mes_usd) }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cuentas Corrientes -->
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Cuentas Corrientes (A cobrar)</h5>
+                <h2 class="card-text">${{ '{:,.2f}'.format(total_cobrar_usd) }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas de Stock -->
+    <div class="col-md-4">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <h5 class="card-title">Artículos con Stock Crítico</h5>
+                <h2 class="card-text">{{ stock_critico|length }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 text-danger"><i class="bi bi-exclamation-triangle"></i> Alertas de Stock (Menos de 10
+                    unidades)</h5>
+            </div>
+            <div class="card-body">
+                {% if stock_critico %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Stock Actual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stock_critico %}
+                            <tr>
+                                <td>#{{ item['id'] }}</td>
+                                <td>{{ item['nombre'] }}</td>
+                                <td>{{ item['categoria'] }}</td>
+                                <td><span class="badge bg-danger">{{ item['stock_actual'] }} unidades</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Todos los artículos tienen stock suficiente.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

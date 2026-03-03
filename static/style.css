@@ -1,0 +1,133 @@
+:root {
+    --primary-color: #2D5A27; /* Verde Bosque Profundo */
+    --primary-color-hover: #1E3D1A;
+    --secondary-color: #8B4513; /* Marrón Arcilla */
+    --bg-color: #F9F9F9;
+    --text-color: #333333;
+    --sidebar-bg: #EAEFEC; /* Un gris verdoso muy sutil para el sidebar */
+    --card-border-radius: 12px;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Tipografía y Encabezados */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* Sidebar Update */
+.sidebar {
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    color: var(--text-color);
+    padding-top: 20px;
+    position: sticky;
+    top: 0;
+    border-right: 1px solid #dcdcdc;
+}
+
+.sidebar h4 {
+    color: var(--primary-color);
+}
+
+.sidebar .slogan {
+    font-size: 0.8rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 0 10px;
+    font-style: italic;
+}
+
+.sidebar a {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 20px;
+    display: block;
+    border-radius: 0 25px 25px 0;
+    margin-right: 15px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    color: white;
+    background-color: var(--primary-color);
+}
+
+.sidebar i {
+    margin-right: 8px;
+}
+
+/* Tarjetas (Cards) Naturales */
+.card {
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 4px 6px rgba(45, 90, 39, 0.08); /* Sombra suave verdosa */
+    border: none;
+    margin-bottom: 20px;
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    border-radius: var(--card-border-radius) var(--card-border-radius) 0 0 !important;
+    border-bottom: 1px solid #eee;
+}
+
+/* Botones y Elementos Bootstrap (Overrides) */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-color-hover);
+    border-color: var(--primary-color-hover);
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+/* Elementos Orgánicos Adicionales */
+.badge {
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+.table th {
+    background-color: var(--primary-color) !important;
+    color: white;
+    font-weight: 500;
+}
+
+.table-dark {
+    --bs-table-bg: var(--primary-color);
+}
+
+/* Widget Motivacional ECO */
+.eco-widget {
+    background: linear-gradient(135deg, var(--primary-color), #4F7942);
+    color: white;
+    border-radius: var(--card-border-radius);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.eco-widget i {
+    font-size: 3rem;
+    opacity: 0.8;
+}

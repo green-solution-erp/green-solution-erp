@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-wrench-adjustable text-primary"></i> <i class="bi bi-droplet text-primary"></i>
+        Servicio Técnico Post-Venta</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoTicketModal">
+            <i class="bi bi-wrench-adjustable"></i> Nuevo Ticket
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nro. Ticket</th>
+                        <th>Fecha</th>
+                        <th>Nro. Serie Máquina</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Técnico</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tickets %}
+                    <tr>
+                        <td>#{{ '{:04d}'.format(t['id']) }}</td>
+                        <td>{{ t['fecha'].split(' ')[0] }}</td>
+                        <td><strong>{{ t['numero_serie'] }}</strong></td>
+                        <td>
+                            {% if t['tipo_mantenimiento'] == 'Preventivo' %}
+                            <span class="badge bg-info text-dark">Preventivo</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Correctivo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t['descripcion'] }}</td>
+                        <td>{{ t['tecnico'] }}</td>
+                        <td>
+                            {% if t['estado'] == 'Abierto' %}
+                            <span class="badge bg-danger">Abierto</span>
+                            {% else %}
+                            <span class="badge bg-success">Cerrado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if t['estado'] == 'Abierto' %}
+                            <form action="{{ url_for('soporte') }}" method="POST" class="d-inline">
+                                <input type="hidden" name="action" value="cerrar_ticket">
+                                <input type="hidden" name="ticket_id" value="{{ t['id'] }}">
+                                <button type="submit" class="btn btn-sm btn-success" title="Cerrar Ticket"><i
+                                        class="bi bi-check-circle"></i></button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nuevo Ticket -->
+<div class="modal fade" id="nuevoTicketModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ url_for('soporte') }}" method="POST">
+            <input type="hidden" name="action" value="add_ticket">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Ticket de Mantenimiento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Máquina (Nro. Serie)</label>
+                        <select class="form-select" name="numero_serie" required>
+                            {% for m in maquinarias %}
+                            <option value="{{ m['numero_serie'] }}">{{ m['numero_serie'] }} - {{ m['marca'] }} {{
+                                m['modelo'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Mantenimiento</label>
+                        <select class="form-select" name="tipo_mantenimiento" required>
+                            <option value="Preventivo">Preventivo</option>
+                            <option value="Correctivo">Correctivo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Técnico Asignado</label>
+                        <input type="text" class="form-control" name="tecnico" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción del Problema/Mantenimiento</label>
+                        <textarea class="form-control" name="descripcion" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Ticket</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
