@@ -248,6 +248,36 @@ def clientes():
     
     return render_template('clientes.html', clientes=clientes_query)
 
+@app.route('/editar_cliente/<int:id>', methods=['POST'])
+@login_required
+def editar_cliente(id):
+    db = get_db()
+    nombre = request.form['nombre_grafica']
+    ruc = request.form['ruc']
+    telefono = request.form['telefono']
+    direccion = request.form['direccion']
+    
+    db.execute('''
+        UPDATE clientes 
+        SET nombre_grafica=?, ruc=?, telefono=?, direccion=? 
+        WHERE id=?
+    ''', (nombre, ruc, telefono, direccion, id))
+    db.commit()
+    flash('Cliente actualizado correctamente.', 'success')
+    return redirect(url_for('clientes'))
+
+@app.route('/eliminar_cliente/<int:id>', methods=['POST'])
+@login_required
+def eliminar_cliente(id):
+    db = get_db()
+    try:
+        db.execute('DELETE FROM clientes WHERE id=?', (id,))
+        db.commit()
+        flash('Cliente eliminado con éxito.', 'success')
+    except sqlite3.IntegrityError:
+        flash('No se puede eliminar el cliente porque tiene ventas o pagos asociados (Seguridad Contable).', 'danger')
+    return redirect(url_for('clientes'))
+
 @app.route('/soporte', methods=['GET', 'POST'])
 @login_required
 def soporte():
