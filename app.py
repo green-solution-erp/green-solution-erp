@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, g
+from flask import Flask, render_template, request, redirect, url_for, flash, g, session
+from functools import wraps
 import sqlite3
 import os
 
@@ -6,6 +7,21 @@ app = Flask(__name__)
 app.secret_key = 'super_secret_key_erp'
 BASE_DIR = os.path.dirname(__file__) or '.'
 DB_FILE = os.path.join(BASE_DIR, 'database.db')
+
+# Usuarios Mockup (Usuario, Contraseña)
+USERS = {
+    'admin': 'admin123',
+    'greenprint': 'eco2024'
+}
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'usuario' not in session:
+            flash('Por favor, inicie sesión para acceder al sistema.', 'danger')
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
 if not os.path.exists(DB_FILE):
     import database
@@ -28,7 +44,29 @@ def get_config():
     db = get_db()
     return db.execute('SELECT * FROM configuracion WHERE id = 1').fetchone()
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        if username in USERS and USERS[username] == password:
+            session['usuario'] = username
+            flash(f'¡Bienvenido de nuevo, {username}!', 'success')
+            return redirect(request.args.get('next') or url_for('dashboard'))
+        else:
+            flash('Credenciales incorrectas.', 'danger')
+            
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('usuario', None)
+    flash('Sesión cerrada correctamente.', 'success')
+    return redirect(url_for('login'))
+
 @app.route('/')
+@login_required
 def dashboard():
     db = get_db()
     # Calcular métricas para el dashboard
@@ -59,6 +97,7 @@ def dashboard():
                            config=config)
 
 @app.route('/configuracion', methods=['GET', 'POST'])
+@login_required
 def configuracion():
     db = get_db()
     if request.method == 'POST':
@@ -74,6 +113,7 @@ def configuracion():
     return render_template('configuracion.html', config=config)
 
 @app.route('/inventario', methods=['GET', 'POST'])
+@login_required
 def inventario():
     db = get_db()
     if request.method == 'POST':
@@ -116,6 +156,7 @@ def inventario():
     return render_template('inventario.html', productos=productos, maquinarias=maquinarias)
 
 @app.route('/editar_producto/<int:id>', methods=['POST'])
+@login_required
 def editar_producto(id):
     db = get_db()
     nombre = request.form['nombre']
@@ -137,6 +178,7 @@ def editar_producto(id):
     return redirect(url_for('inventario'))
 
 @app.route('/eliminar_producto/<int:id>', methods=['POST'])
+@login_required
 def eliminar_producto(id):
     db = get_db()
     db.execute('DELETE FROM productos WHERE id=?', (id,))
@@ -145,6 +187,7 @@ def eliminar_producto(id):
     return redirect(url_for('inventario'))
 
 @app.route('/clientes', methods=['GET', 'POST'])
+@login_required
 def clientes():
     db = get_db()
     
@@ -194,6 +237,7 @@ def clientes():
     return render_template('clientes.html', clientes=clientes_query)
 
 @app.route('/soporte', methods=['GET', 'POST'])
+@login_required
 def soporte():
     db = get_db()
     if request.method == 'POST':
@@ -222,6 +266,7 @@ def soporte():
     return render_template('soporte.html', tickets=tickets, maquinarias=maquinarias)
 
 @app.route('/ventas', methods=['GET', 'POST'])
+@login_required
 def ventas():
     db = get_db()
     if request.method == 'POST':
