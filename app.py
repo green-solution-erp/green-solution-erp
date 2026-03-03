@@ -1,27 +1,32 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, g, session
-from functools import wraps
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_bcrypt import Bcrypt
 import sqlite3
 import os
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_key_erp'
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Por favor, inicie sesión para acceder al sistema.'
+login_manager.login_message_category = 'danger'
+
 BASE_DIR = os.path.dirname(__file__) or '.'
 DB_FILE = os.path.join(BASE_DIR, 'database.db')
 
-# Usuarios Mockup (Usuario, Contraseña)
-USERS = {
-    'admin': 'admin123',
-    'greenprint': 'eco2024'
-}
+class User(UserMixin):
+    def __init__(self, id, username):
+        self.id = id
+        self.username = username
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'usuario' not in session:
-            flash('Por favor, inicie sesión para acceder al sistema.', 'danger')
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
-    return decorated_function
+@login_manager.user_loader
+def load_user(user_id):
+    db = get_db()
+    user_row = db.execute('SELECT * FROM usuarios WHERE id = ?', (user_id,)).fetchone()
+    if user_row:
+        return User(id=user_row['id'], username=user_row['username'])
+    return None
 
 if not os.path.exists(DB_FILE):
     import database
@@ -46,12 +51,19 @@ def get_config():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         
-        if username in USERS and USERS[username] == password:
-            session['usuario'] = username
+        db = get_db()
+        user_row = db.execute('SELECT * FROM usuarios WHERE username = ?', (username,)).fetchone()
+        
+        if user_row and bcrypt.check_password_hash(user_row['password_hash'], password):
+            user = User(id=user_row['id'], username=user_row['username'])
+            login_user(user)
             flash(f'¡Bienvenido de nuevo, {username}!', 'success')
             return redirect(request.args.get('next') or url_for('dashboard'))
         else:
@@ -60,8 +72,9 @@ def login():
     return render_template('login.html')
 
 @app.route('/logout')
+@login_required
 def logout():
-    session.pop('usuario', None)
+    logout_user()
     flash('Sesión cerrada correctamente.', 'success')
     return redirect(url_for('login'))
 

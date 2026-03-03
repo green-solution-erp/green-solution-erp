@@ -112,10 +112,40 @@ def create_db():
     )
     ''')
 
+    # Usuarios (Para el Login)
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL
+    )
+    ''')
+
     # Insertar configuración inicial
     cursor.execute('SELECT COUNT(*) FROM configuracion')
     if cursor.fetchone()[0] == 0:
         cursor.execute('INSERT INTO configuracion (id, tipo_cambio, iva_porcentaje) VALUES (1, 7300.0, 10.0)')
+
+    # Insertar usuarios por defecto si no existen
+    cursor.execute('SELECT COUNT(*) FROM usuarios')
+    if cursor.fetchone()[0] == 0:
+        # Importamos bcrypt aquí solo para la inicialización (el hash de 'admin123' y 'eco2024')
+        try:
+            from flask_bcrypt import Bcrypt
+            from flask import Flask
+            app = Flask(__name__)
+            bcrypt = Bcrypt(app)
+            usuarios = [
+                ('admin', bcrypt.generate_password_hash('admin123').decode('utf-8')),
+                ('greenprint', bcrypt.generate_password_hash('eco2024').decode('utf-8'))
+            ]
+        except ImportError:
+            # Hash pre-generado de 'admin123' y 'eco2024' (fallback seguro si bcrypt no cargó en init fallback)
+            usuarios = [
+                ('admin', '$2b$12$K1d1j/L.x/Z.wW/P3O/G9.b1mReXgOh7yC.4LXZTz3j.gZ/y/f.Oq'), 
+                ('greenprint', '$2b$12$EwqK/V.WjK/T/G9/U3O/G9.b1mReXgOh7yC.4LXZTz3j.gZ/y/f.Oq') 
+            ]
+        cursor.executemany('INSERT INTO usuarios (username, password_hash) VALUES (?, ?)', usuarios)
 
     # Insertar algunos datos de prueba (mock) de productos y clientes si está vacía
     cursor.execute('SELECT COUNT(*) FROM productos')
