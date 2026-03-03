@@ -4,8 +4,12 @@ import os
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_key_erp'
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(__file__) or '.'
 DB_FILE = os.path.join(BASE_DIR, 'database.db')
+
+if not os.path.exists(DB_FILE):
+    import database
+    database.create_db()
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -273,7 +277,4 @@ def ventas():
     return render_template('ventas.html', clientes=clientes, productos=productos, ventas_historial=ventas_historial)
 
 if __name__ == '__main__':
-    if not os.path.exists(DB_FILE):
-        import database
-        database.create_db()
     app.run(debug=True)

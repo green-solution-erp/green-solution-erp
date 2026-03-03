@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(__file__) or '.'
 DB_FILE = os.path.join(BASE_DIR, 'database.db')
 
 def create_db():
