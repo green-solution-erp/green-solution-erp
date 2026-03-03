@@ -45,7 +45,7 @@
                     </div>
                     <div class="slogan">"Soluciones gráficas en armonía con el medio ambiente"</div>
 
-                    {% if session.get('usuario') %}
+                    {% if current_user.is_authenticated %}
                     <a href="{{ url_for('dashboard') }}"
                         class="{% if request.endpoint == 'dashboard' %}active{% endif %}"><i
                             class="bi bi-speedometer2"></i> Inicio</a>
@@ -65,7 +65,7 @@
                         Configuración</a>
                     <hr class="my-3">
                     <a href="{{ url_for('logout') }}" class="text-danger"><i class="bi bi-box-arrow-right"></i> Cerrar
-                        Sesión ({{ session.get('usuario') }})</a>
+                        Sesión ({{ current_user.username }})</a>
                     {% else %}
                     <a href="{{ url_for('login') }}"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
                     {% endif %}
