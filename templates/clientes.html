@@ -44,8 +44,12 @@
                                     <button class="btn btn-sm btn-success" data-bs-toggle="modal"
                                         data-bs-target="#reciboPagoModal{{ c['id'] }}" title="Registrar Pago / Abono"><i
                                             class="bi bi-piggy-bank"></i></button>
-                                    <a href="#" class="btn btn-sm btn-outline-info" title="Ver Historial"><i
-                                            class="bi bi-list-ul"></i></a>
+                                    <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
+                                        data-bs-target="#editarClienteModal{{ c['id'] }}" title="Editar Cliente"><i
+                                            class="bi bi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#eliminarClienteModal{{ c['id'] }}" title="Eliminar Cliente"><i
+                                            class="bi bi-trash"></i></button>
                                 </td>
                             </tr>
 
@@ -82,6 +86,81 @@
                                                 <button type="button" class="btn btn-secondary"
                                                     data-bs-dismiss="modal">Cancelar</button>
                                                 <button type="submit" class="btn btn-success">Registrar Pago</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Modal Editar Cliente -->
+                            <div class="modal fade" id="editarClienteModal{{ c['id'] }}" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <form action="{{ url_for('editar_cliente', id=c['id']) }}" method="POST">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Editar Cliente - {{ c['nombre_grafica'] }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Nombre de la Gráfica / Empresa</label>
+                                                    <input type="text" class="form-control" name="nombre_grafica"
+                                                        value="{{ c['nombre_grafica'] }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">RUC</label>
+                                                    <input type="text" class="form-control" name="ruc"
+                                                        value="{{ c['ruc'] }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Teléfono</label>
+                                                    <input type="text" class="form-control" name="telefono"
+                                                        value="{{ c['telefono'] }}">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Dirección</label>
+                                                    <textarea class="form-control" name="direccion"
+                                                        rows="2">{{ c['direccion'] }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Modal Eliminar Cliente -->
+                            <div class="modal fade" id="eliminarClienteModal{{ c['id'] }}" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <form action="{{ url_for('eliminar_cliente', id=c['id']) }}" method="POST">
+                                        <div class="modal-content text-bg-dark">
+                                            <div class="modal-header border-danger">
+                                                <h5 class="modal-title text-danger"><i
+                                                        class="bi bi-exclamation-triangle-fill"></i> Eliminar Cliente
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white"
+                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>¿Estás completamente seguro de que deseas eliminar permanentemente a
+                                                    <strong>{{ c['nombre_grafica'] }}</strong> del sistema?</p>
+                                                <p class="text-danger small">Si este cliente tiene registros de ventas o
+                                                    cuentas corrientes, el sistema bloqueará la eliminación por
+                                                    seguridad contable.</p>
+                                            </div>
+                                            <div class="modal-footer border-danger">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-danger"
+                                                    onclick="return confirm('ÚLTIMA ADVERTENCIA: Esta acción es irreversible. ¿Proceder?');">Eliminar
+                                                    Definitivamente</button>
                                             </div>
                                         </div>
                                     </form>
