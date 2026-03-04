@@ -171,10 +171,10 @@ def create_db():
     cursor.execute('SELECT COUNT(*) FROM maquinarias')
     if cursor.fetchone()[0] == 0:
         maquinarias = [
-            ('NOC-12345', 'Nocai', 'UV 6090'),
-            ('VUL-98765', 'Vulcan', 'FC-500VC')
+            ('Impresora UV 6090', 'Nocai', 'Impresión UV', 8500.0, 10500.0, 2),
+            ('Plotter de Corte FC-500VC', 'Vulcan', 'Terminación', 1500.0, 2200.0, 5)
         ]
-        cursor.executemany('INSERT INTO maquinarias (numero_serie, marca, modelo) VALUES (?, ?, ?)', maquinarias)
+        cursor.executemany('INSERT INTO maquinarias (nombre, marca, categoria, precio_costo_usd, precio_venta_usd, stock_actual) VALUES (?, ?, ?, ?, ?, ?)', maquinarias)
 
     conn.commit()
     conn.close()
@@ -182,3 +182,6 @@ def create_db():
 if __name__ == '__main__':
     create_db()
     print("Base de datos inicializada correctamente.")
+
+
+  
