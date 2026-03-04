@@ -19,7 +19,7 @@
                     <tr>
                         <th>Nro. Ticket</th>
                         <th>Fecha</th>
-                        <th>Nro. Serie Máquina</th>
+                        <th>Máquina (Nombre y Marca)</th>
                         <th>Tipo</th>
                         <th>Descripción</th>
                         <th>Técnico</th>
@@ -32,7 +32,7 @@
                     <tr>
                         <td>#{{ '{:04d}'.format(t['id']) }}</td>
                         <td>{{ t['fecha'].split(' ')[0] }}</td>
-                        <td><strong>{{ t['numero_serie'] }}</strong></td>
+                        <td><strong>{{ t['maquina_nombre'] }} ({{ t['maquina_marca'] }})</strong></td>
                         <td>
                             {% if t['tipo_mantenimiento'] == 'Preventivo' %}
                             <span class="badge bg-info text-dark">Preventivo</span>
@@ -79,11 +79,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Máquina (Nro. Serie)</label>
-                        <select class="form-select" name="numero_serie" required>
+                        <label class="form-label">Máquina</label>
+                        <select class="form-select" name="maquina_id" required>
                             {% for m in maquinarias %}
-                            <option value="{{ m['numero_serie'] }}">{{ m['numero_serie'] }} - {{ m['marca'] }} {{
-                                m['modelo'] }}</option>
+                            <option value="{{ m['id'] }}">#{{ m['id'] }} - {{ m['nombre'] }} ({{ m['marca'] }})</option>
                             {% endfor %}
                         </select>
                     </div>
