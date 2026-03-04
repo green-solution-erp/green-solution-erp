@@ -32,15 +32,26 @@ def create_db():
     )
     ''')
 
-    # Maquinaria (Por Número de Serie)
+    # Migración: Si la tabla antigua maquinarias existe sin precio_costo_usd, la borramos para recrear el nuevo esquema
+    cursor.execute("PRAGMA table_info(maquinarias)")
+    cols = [col[1] for col in cursor.fetchall()]
+    if cols and 'precio_costo_usd' not in cols:
+        cursor.execute("PRAGMA foreign_keys=OFF")
+        cursor.execute("DROP TABLE IF EXISTS venta_detalles")
+        cursor.execute("DROP TABLE IF EXISTS tickets_servicio")
+        cursor.execute("DROP TABLE IF EXISTS maquinarias")
+        cursor.execute("PRAGMA foreign_keys=ON")
+
+    # Maquinaria (Nuevo esquema como inventario)
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS maquinarias (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        numero_serie TEXT UNIQUE NOT NULL,
+        nombre TEXT NOT NULL,
         marca TEXT NOT NULL,
-        modelo TEXT,
-        estado TEXT DEFAULT 'Disponible',
-        eficiencia_energetica TEXT DEFAULT 'Estándar'
+        categoria TEXT NOT NULL,
+        precio_costo_usd REAL NOT NULL,
+        precio_venta_usd REAL NOT NULL,
+        stock_actual INTEGER NOT NULL
     )
     ''')
 
@@ -73,13 +84,13 @@ def create_db():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS tickets_servicio (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        numero_serie TEXT NOT NULL,
+        maquina_id INTEGER NOT NULL,
         fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
         descripcion TEXT NOT NULL,
         tipo_mantenimiento TEXT NOT NULL, -- 'Preventivo' o 'Correctivo'
         tecnico TEXT,
         estado TEXT DEFAULT 'Abierto',
-        FOREIGN KEY (numero_serie) REFERENCES maquinarias (numero_serie)
+        FOREIGN KEY (maquina_id) REFERENCES maquinarias (id)
     )
     ''')
 
@@ -102,13 +113,13 @@ def create_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         venta_id INTEGER NOT NULL,
         producto_id INTEGER,
-        numero_serie_maquina TEXT,
+        maquina_id INTEGER,
         cantidad INTEGER NOT NULL,
         precio_unitario_usd REAL NOT NULL,
         subtotal_usd REAL NOT NULL,
         FOREIGN KEY (venta_id) REFERENCES ventas (id),
         FOREIGN KEY (producto_id) REFERENCES productos (id),
-        FOREIGN KEY (numero_serie_maquina) REFERENCES maquinarias (numero_serie)
+        FOREIGN KEY (maquina_id) REFERENCES maquinarias (id)
     )
     ''')
 
