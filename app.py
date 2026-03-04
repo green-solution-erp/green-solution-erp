@@ -148,18 +148,19 @@ def inventario():
             flash('Producto agregado correctamente.', 'success')
             
         elif action == 'add_maquina':
-            nro_serie = request.form['numero_serie']
+            nombre = request.form['nombre']
             marca = request.form['marca']
-            modelo = request.form['modelo']
-            eficiencia = request.form.get('eficiencia_energetica', 'Estándar')
+            categoria = request.form['categoria']
+            costo = float(request.form['precio_costo_usd'])
+            venta = float(request.form['precio_venta_usd'])
+            stock = int(request.form['stock_actual'])
             
-            try:
-                db.execute('INSERT INTO maquinarias (numero_serie, marca, modelo, eficiencia_energetica) VALUES (?, ?, ?, ?)', 
-                           (nro_serie, marca, modelo, eficiencia))
-                db.commit()
-                flash('Máquina registrada correctamente.', 'success')
-            except sqlite3.IntegrityError:
-                flash('Error: Ya existe una máquina con ese número de serie.', 'danger')
+            db.execute('''
+                INSERT INTO maquinarias (nombre, marca, categoria, precio_costo_usd, precio_venta_usd, stock_actual)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (nombre, marca, categoria, costo, venta, stock))
+            db.commit()
+            flash('Máquina registrada correctamente.', 'success')
                 
         return redirect(url_for('inventario'))
         
@@ -196,6 +197,38 @@ def eliminar_producto(id):
     db.execute('DELETE FROM productos WHERE id=?', (id,))
     db.commit()
     flash('Producto eliminado con éxito.', 'success')
+    return redirect(url_for('inventario'))
+
+@app.route('/editar_maquina/<int:id>', methods=['POST'])
+@login_required
+def editar_maquina(id):
+    db = get_db()
+    nombre = request.form['nombre']
+    marca = request.form['marca']
+    categoria = request.form['categoria']
+    costo = float(request.form['precio_costo_usd'])
+    venta = float(request.form['precio_venta_usd'])
+    stock = int(request.form['stock_actual'])
+    
+    db.execute('''
+        UPDATE maquinarias 
+        SET nombre=?, marca=?, categoria=?, precio_costo_usd=?, precio_venta_usd=?, stock_actual=? 
+        WHERE id=?
+    ''', (nombre, marca, categoria, costo, venta, stock, id))
+    db.commit()
+    flash('Máquina actualizada correctamente.', 'success')
+    return redirect(url_for('inventario'))
+
+@app.route('/eliminar_maquina/<int:id>', methods=['POST'])
+@login_required
+def eliminar_maquina(id):
+    db = get_db()
+    try:
+        db.execute('DELETE FROM maquinarias WHERE id=?', (id,))
+        db.commit()
+        flash('Máquina eliminada con éxito.', 'success')
+    except sqlite3.IntegrityError:
+        flash('No se puede eliminar la máquina porque tiene dependencias.', 'danger')
     return redirect(url_for('inventario'))
 
 @app.route('/clientes', methods=['GET', 'POST'])
@@ -285,13 +318,13 @@ def soporte():
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'add_ticket':
-            numero_serie = request.form['numero_serie']
+            maquina_id = request.form['maquina_id']
             tipo = request.form['tipo_mantenimiento']
             tecnico = request.form['tecnico']
             descripcion = request.form['descripcion']
             
-            db.execute('INSERT INTO tickets_servicio (numero_serie, tipo_mantenimiento, tecnico, descripcion) VALUES (?, ?, ?, ?)',
-                       (numero_serie, tipo, tecnico, descripcion))
+            db.execute('INSERT INTO tickets_servicio (maquina_id, tipo_mantenimiento, tecnico, descripcion) VALUES (?, ?, ?, ?)',
+                       (maquina_id, tipo, tecnico, descripcion))
             db.commit()
             flash('Ticket registrado exitosamente.', 'success')
             
@@ -303,8 +336,13 @@ def soporte():
             
         return redirect(url_for('soporte'))
         
-    tickets = db.execute('SELECT * FROM tickets_servicio ORDER BY estado ASC, id DESC').fetchall()
-    maquinarias = db.execute('SELECT * FROM maquinarias').fetchall()
+    tickets = db.execute('''
+        SELECT t.*, m.nombre as maquina_nombre, m.marca as maquina_marca 
+        FROM tickets_servicio t 
+        JOIN maquinarias m ON t.maquina_id = m.id 
+        ORDER BY t.estado ASC, t.id DESC
+    ''').fetchall()
+    maquinarias = db.execute('SELECT id, nombre, marca FROM maquinarias ORDER BY nombre').fetchall()
     return render_template('soporte.html', tickets=tickets, maquinarias=maquinarias)
 
 @app.route('/ventas', methods=['GET', 'POST'])
